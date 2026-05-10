@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${post.title}">게시글</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+    <div class="top-actions">
+        <a href="/">홈</a>
+        <button onclick="editPost()">게시글 수정</button>
+        <button onclick="deletePost()">게시글 삭제</button>
+    </div>
+
+    <h1 th:text="${post.title}"></h1>
+    <p th:text="${post.content}"></p>
+
+    <div class="msg" th:if="${error}" th:text="${error}"></div>
+
+    <h2>댓글 작성</h2>
+    <form th:action="@{|/posts/${post.id}/comments|}" method="post" class="form inline">
+        <input type="text" name="content" placeholder="댓글 내용" required>
+        <input type="password" name="password" maxlength="10" placeholder="암호(10자 이내)" required>
+        <button type="submit">등록</button>
+    </form>
+
+    <h2>댓글 목록 (최신순)</h2>
+    <ul class="list">
+        <li th:if="${#lists.isEmpty(comments)}">댓글이 없습니다.</li>
+        <li th:each="comment : ${comments}">
+            <span th:text="${comment.content}"></span>
+            <small th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}"></small>
+            <button th:onclick="|editComment(${comment.id}, '${comment.content}')|">수정</button>
+            <button th:onclick="|deleteComment(${comment.id})|">삭제</button>
+        </li>
+    </ul>
+</div>
+
+<script th:inline="javascript">
+    const postId = [[${post.id}]];
+
+    function editPost() {
+        const password = prompt('게시글 비밀번호를 입력하세요');
+        if (!password) return;
+        const title = prompt('새 제목을 입력하세요', [[${post.title}]]);
+        if (title === null) return;
+        const content = prompt('새 내용을 입력하세요', [[${post.content}]]);
+        if (content === null) return;
+        submit('/posts/' + postId + '/edit', {password, title, content});
+    }
+
+    function deletePost() {
+        const password = prompt('게시글 비밀번호를 입력하세요');
+        if (!password) return;
+        submit('/posts/' + postId + '/delete', {password});
+    }
+
+    function editComment(commentId, oldContent) {
+        const password = prompt('댓글 비밀번호를 입력하세요');
+        if (!password) return;
+        const content = prompt('수정할 댓글 내용을 입력하세요', oldContent);
+        if (content === null) return;
+        submit('/posts/' + postId + '/comments/' + commentId + '/edit', {password, content});
+    }
+
+    function deleteComment(commentId) {
+        const password = prompt('댓글 비밀번호를 입력하세요');
+        if (!password) return;
+        submit('/posts/' + postId + '/comments/' + commentId + '/delete', {password});
+    }
+
+    function submit(action, fields) {
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = action;
+        Object.entries(fields).forEach(([k, v]) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = k;
+            input.value = v;
+            form.appendChild(input);
+        });
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+</body>
+</html>
