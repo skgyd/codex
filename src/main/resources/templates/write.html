@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 작성</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+    <h1>게시글 작성</h1>
+    <form action="/posts" method="post" class="form">
+        <label>암호 (최대 10자리)</label>
+        <input type="password" name="password" maxlength="10" required>
+
+        <label>제목</label>
+        <input type="text" name="title" required>
+
+        <label>내용</label>
+        <textarea name="content" rows="8" required></textarea>
+
+        <button type="submit">등록</button>
+    </form>
+</div>
+</body>
+</html>
